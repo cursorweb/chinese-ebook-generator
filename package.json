@@ -1,0 +1,18 @@
+{
+  "type": "module",
+  "name": "macro-econ-game",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "html-pdf-node": "^1.0.8",
+    "node-fetch": "^3.3.2"
+  }
+}
