@@ -15,3 +15,7 @@ You can also use the website hosted by github pages: https://cursorweb.github.io
 
 ## Disclaimers
 本站内容来源于网络，版权归属作家本人，如侵犯了您的利益，请联系删除。
+
+## Future Goals
+- fix overall code quality
+- remove ebook code duplication

@@ -1,5 +1,6 @@
 /*
 Ebook and single-page generator for jiemi
+This is a special file for splitting txt files
 */
 
 import * as cheerio from "cheerio";
