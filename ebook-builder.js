@@ -5,52 +5,37 @@ Builds multi-page ebook
 import * as cheerio from "cheerio";
 import fs from "fs";
 
+const BOOK_ID = "zsh";
+import data from "./output/json/zsh.json" assert { type: "json" };
+
 /*
 <h1>[chapter]</h1>
 <pre><p>[content]</p></pre>
 */
 
-const templateText = fs.readFileSync("templates/ebook/zsh.html", "utf8");
-// const chapters = 62;
-let $out = cheerio.load(templateText);
+const templateText = fs.readFileSync(`templates/ebook/${BOOK_ID}.html`, "utf8");
+/** @type {cheerio.CheerioAPI} */
+let $out;
 
-const source = fs.readFileSync("output/formatted/zsh.html", "utf8");
+if (!fs.existsSync(`output/ebook/${BOOK_ID}`)) {
+    fs.mkdirSync(`output/ebook/${BOOK_ID}`);
+}
 
+for (let i = 0; i < data.pages.length; i++) {
+    const { title, subtitle = null, content } = data.pages[i];
+    $out = cheerio.load(templateText);
 
+    createTitle(title, subtitle);
+    createMainText(content);
+    createNav(i);
 
-// let totalI = 0;
+    if (i == data.pages.length - 1) {
+        createCredits();
+    }
 
-// for (let i = 0; i < chapters; i++) {
-//     $out = cheerio.load(templateText);
-
-//     const text = fs.readFileSync(`output/scraped/${i}.html`, "utf8");
-//     const $ = cheerio.load(text);
-
-//     let content = $("p").text();
-//     // content = content.trim().split("\n").map(s => s.trim()).join("\n");
-//     const pre = $("<pre>").append($("<p>").text(content));
-
-//     let title = $("h1").text();
-//     // const h1 = $("<h1>").text(title);
-//     {
-//         const [_, _1, titleText, subTitle] = title.split(/\s+/);
-//         $out("main").append($("<h1>").text(titleText), $("<h2>").text(subTitle));
-//         // $out("main").append();
-//     }
-
-//     $out("main").append(pre);
-
-//     if (totalI > 0) {
-//         $out("main").append($(`<div><a href="${totalI - 1}.html">上</a></div>`));
-//     }
-
-//     if (totalI < chapters - 1) {
-//         $out("main").append($(`<div><a href="${i + 1}.html">下</a></div>`));
-//     }
-
-//     const out = $out.html();
-//     fs.writeFileSync(`output/ebook/mengzhihai/${i}.html`, out);
-// }
+    const out = $out.html();
+    fs.writeFileSync(`output/ebook/${BOOK_ID}/${i}.html`, out);
+}
 
 
 function createMainText(content) {
@@ -64,4 +49,35 @@ function createTitle(title, subtitle = null) {
     if (subtitle) {
         $out("main").append($out("<h2>").text(subtitle));
     }
+}
+
+function createNav(idx) {
+    const nav = $out("<nav>");
+    nav.css({
+        "display": "flex",
+        "flex-direction": "row",
+        "justify-content": "space-between",
+    });
+
+    if (idx > 0) {
+        nav.append($out(`<div><a href="${idx - 1}.html">上一页</a></div>`));
+    }
+
+    if (idx < data.pages.length - 1) {
+        nav.append($out(`<div><a href="${idx + 1}.html">下一页</a></div>`));
+    }
+
+    $out("main").append(nav);
+}
+
+
+function createCredits() {
+    const footer = $out("<footer>").html(`版权归本<a href="${data.source}" target="_blank">这个网站</a>。`);
+    footer.css({
+        "font-size": 24,
+        "text-align": "center",
+        "padding": 8,
+        // "background": "rgba(0, 0, 0, 0.1)"
+    });
+    $out('main').after(footer);
 }

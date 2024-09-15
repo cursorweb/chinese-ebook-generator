@@ -5,43 +5,26 @@ Single-page html to be converted to be pdf
 import * as cheerio from "cheerio";
 import fs from "fs";
 
+// todo: get a good configurable loader
+import data from "./output/json/zsh.json" assert { type: "json" };
+const BOOK_ID = "zsh";
+
 /*
 Format:
 <h1>[chapter]</h1>
 <pre><p>[content]</p></pre>
 */
 
-const templateText = fs.readFileSync("templates/single/zsh.html", "utf8");
+
+const templateText = fs.readFileSync(`templates/single/${BOOK_ID}.html`, "utf8");
 const $out = cheerio.load(templateText);
 
-const maxChapter = 62; // max file *name*
-
-for (let i = 0; i <= maxChapter; i++) {
-    const text = fs.readFileSync(`output/scraped/${i}.html`, "utf8");
-    const $ = cheerio.load(text);
-
-    let rawContent = $("tr:nth-child(4) td").text().trim();
-    let content = rawContent.split(/(▼.+?)\n/).filter(i => i);
-
-    if (i == 0) {
-        for (let j = 0; j < content.length; j += 2) {
-            // remove triangle
-            const title = content[j].slice(1);
-            createTitle(title);
-            createMainText(content[j + 1]);
-        }
-        continue;
-    }
-
-    // remove triangle
-    if (content[0].includes("▼")) {
-        const [title, sub] = content[0].slice(1).split("：");
-        createTitle(title, sub);
-        createMainText(content.slice(1).join("\n"));
-    } else {
-        createMainText(content.join("\n"));
-    }
+for (const { title, subtitle = null, content } of data.pages) {
+    createTitle(title, subtitle);
+    createMainText(content);
 }
+
+createCredits();
 
 function createMainText(content) {
     const pre = $out("<pre>").append($out("<p>").text(content));
@@ -56,5 +39,15 @@ function createTitle(title, subtitle = null) {
     }
 }
 
+function createCredits() {
+    const footer = $out("<footer>").html(`版权归本<a href="${data.source}" target="_blank">这个网站</a>。`);
+    footer.css({
+        "font-size": 24,
+        "text-align": "center",
+        "padding": 8,
+    });
+    $out('main').after(footer);
+}
+
 const out = $out.html();
-fs.writeFileSync("output/formatted/zsh.html", out);
+fs.writeFileSync(`output/formatted/${BOOK_ID}.html`, out);
