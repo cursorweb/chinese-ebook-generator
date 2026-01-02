@@ -4,15 +4,19 @@
 import fetch from "node-fetch";
 import fs from "fs";
 
-const URL = "https://www.xuges.com/kh/nk/zsh";
-const CHARSET = "utf8";
+const URL = "https://www.kanunu8.com/book3/6654";
+const CHARSET = "gbk";
 
-const start = 1;
-const final = 63;
+const start = 51035;
+const final = 51044;
 
+
+if (!fs.existsSync("output/scraped")) {
+    fs.mkdirSync("output/scraped");
+}
 
 for (let i = start; i <= final; i++) {
-    const text = await fetch(`${URL}/${i.toString().padStart(2, '0')}.htm`, {
+    const text = await fetch(`${URL}/${i.toString().padStart(2, '0')}.html`, {
         headers: {
             "Content-Type": `text/plain; charset=${CHARSET}`
         }
